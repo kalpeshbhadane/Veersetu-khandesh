@@ -32,36 +32,35 @@ jobs:
           npm install
           npm run build
 
-      - name: Copy backend jar to server
-        uses: appleboy/scp-action@v0.1.7
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "target/khandesh-1.0.0.jar"
-          target: "/home/ubuntu/veersetu-khandesh/target/"
-          strip_components: 1
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Ensure remote folders exist
+        run: |
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "mkdir -p /home/${{ secrets.EC2_USERNAME }}/veersetu-khandesh/target /home/${{ secrets.EC2_USERNAME }}/veersetu-khandesh-incoming-dist"
+
+      - name: Copy backend jar to server
+        run: |
+          scp target/khandesh-1.0.0.jar ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/veersetu-khandesh/target/khandesh-1.0.0.jar
 
       - name: Copy frontend build to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "frontend/dist/*"
-          target: "/home/ubuntu/veersetu-khandesh-incoming-dist/"
-          strip_components: 2
+        run: |
+          scp -r frontend/dist/* ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/veersetu-khandesh-incoming-dist/
 
       - name: Restart backend and republish frontend
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            sudo systemctl restart veersetu
-            sudo rm -rf /var/www/veersetu-khandesh/*
-            sudo cp -r /home/ubuntu/veersetu-khandesh-incoming-dist/* /var/www/veersetu-khandesh/
-            sudo chown -R www-data:www-data /var/www/veersetu-khandesh
-            sudo systemctl reload nginx
+        run: |
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
+            sudo systemctl restart veersetu &&
+            sudo rm -rf /var/www/veersetu-khandesh/* &&
+            sudo cp -r /home/${{ secrets.EC2_USERNAME }}/veersetu-khandesh-incoming-dist/* /var/www/veersetu-khandesh/ &&
+            sudo chown -R www-data:www-data /var/www/veersetu-khandesh &&
+            sudo systemctl reload nginx &&
             echo "Deploy complete"
+          '
