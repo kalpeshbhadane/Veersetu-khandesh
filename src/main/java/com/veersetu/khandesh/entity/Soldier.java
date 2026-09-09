@@ -31,7 +31,8 @@ public class Soldier {
     private String photoPath; // uploaded portrait, e.g. /uploads/photos/xyz.jpg
 
     // ---- Service details ----
-    private String force;        // Indian Army / Indian Navy / Indian Air Force / BSF / CRPF / etc.
+@Column(name = "force_name") // "force" is a reserved word in MySQL (FORCE INDEX)
+private String force;        // Indian Army / Indian Navy / Indian Air Force / BSF / CRPF / etc.
     private String battalion;    // e.g. "4 Rajputana Rifles"
     private String unit;
     @Column(name = "soldier_rank") // "rank" is a reserved word in MySQL 8+
