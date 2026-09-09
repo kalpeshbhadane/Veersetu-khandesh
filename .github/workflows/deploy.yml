@@ -32,31 +32,28 @@ jobs:
           npm install
           npm run build
 
-      - name: Set up SSH agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
-
-      - name: Add server to known_hosts
+      - name: Decode SSH key
         run: |
           mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" | base64 -d > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
       - name: Ensure remote folders exist
         run: |
-          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "mkdir -p /home/${{ secrets.EC2_USERNAME }}/veersetu-khandesh/target /home/${{ secrets.EC2_USERNAME }}/veersetu-khandesh-incoming-dist"
+          ssh -i ~/.ssh/deploy_key ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "mkdir -p /home/${{ secrets.EC2_USERNAME }}/veersetu-khandesh/target /home/${{ secrets.EC2_USERNAME }}/veersetu-khandesh-incoming-dist"
 
       - name: Copy backend jar to server
         run: |
-          scp target/khandesh-1.0.0.jar ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/veersetu-khandesh/target/khandesh-1.0.0.jar
+          scp -i ~/.ssh/deploy_key target/khandesh-1.0.0.jar ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/veersetu-khandesh/target/khandesh-1.0.0.jar
 
       - name: Copy frontend build to server
         run: |
-          scp -r frontend/dist/* ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/veersetu-khandesh-incoming-dist/
+          scp -i ~/.ssh/deploy_key -r frontend/dist/* ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/veersetu-khandesh-incoming-dist/
 
       - name: Restart backend and republish frontend
         run: |
-          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
+          ssh -i ~/.ssh/deploy_key ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
             sudo systemctl restart veersetu &&
             sudo rm -rf /var/www/veersetu-khandesh/* &&
             sudo cp -r /home/${{ secrets.EC2_USERNAME }}/veersetu-khandesh-incoming-dist/* /var/www/veersetu-khandesh/ &&
