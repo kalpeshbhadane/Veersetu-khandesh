@@ -16,7 +16,6 @@ async function request(path, options = {}) {
   }
   return data;
 }
-
 export const api = {
   get: (path) => request(path),
   post: (path, body) =>
@@ -24,6 +23,7 @@ export const api = {
       method: "POST",
       body: body instanceof FormData ? body : JSON.stringify(body),
     }),
+  put: (path, body) => request(path, { method: "PUT", body: JSON.stringify(body) }),
   postForm: (path, formData) => request(path, { method: "POST", body: formData }),
 };
 

@@ -39,4 +39,18 @@ public class AuthApiController {
         var user = userService.findByEmail(authentication.getName());
         return ResponseEntity.ok(UserResponse.from(user));
     }
+
+    @PutMapping("/me")
+    public ResponseEntity<?> updateMe(@Valid @RequestBody com.veersetu.khandesh.dto.UpdateProfileDto dto,
+                                       Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).body(Map.of("message", "Not logged in."));
+        }
+        try {
+            var user = userService.updateProfile(authentication.getName(), dto);
+            return ResponseEntity.ok(UserResponse.from(user));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
 }

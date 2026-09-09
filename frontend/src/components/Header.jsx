@@ -36,6 +36,7 @@ export default function Header() {
           {user && user.role === "ADMIN" && (
             <Link to="/admin/dashboard" className="nav-cta">Admin Dashboard</Link>
           )}
+          {user && <Link to="/profile">My Profile</Link>}
           {user && (
             <button className="nav-logout" onClick={handleLogout}>Log out</button>
           )}

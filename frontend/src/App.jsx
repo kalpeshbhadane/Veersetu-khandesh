@@ -12,6 +12,7 @@ import FamilyDashboard from "./pages/FamilyDashboard.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
 import AdminReview from "./pages/AdminReview.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import Profile from "./pages/Profile.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 
 function ProtectedRoute({ role, children }) {
@@ -34,7 +35,15 @@ export default function App() {
         <Route path="/soldiers/:id" element={<SoldierDetail />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<RegisterFamily />} />
-
+ 
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/family/dashboard"
           element={
