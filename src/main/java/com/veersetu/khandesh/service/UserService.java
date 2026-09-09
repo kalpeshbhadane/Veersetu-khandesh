@@ -51,4 +51,23 @@ public class UserService implements UserDetailsService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
     }
+    public User updateProfile(String email, com.veersetu.khandesh.dto.UpdateProfileDto dto) {
+        User user = findByEmail(email);
+        user.setFullName(dto.getFullName());
+        user.setPhone(dto.getPhone());
+        user.setRelationToSoldier(dto.getRelationToSoldier());
+
+        if (dto.getNewPassword() != null && !dto.getNewPassword().isBlank()) {
+            if (dto.getCurrentPassword() == null
+                    || !passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
+                throw new IllegalArgumentException("Current password is incorrect.");
+            }
+            if (dto.getNewPassword().length() < 6) {
+                throw new IllegalArgumentException("New password must be at least 6 characters.");
+            }
+            user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        }
+
+        return userRepository.save(user);
+    }
 }
