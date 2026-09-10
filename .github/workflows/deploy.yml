@@ -6,6 +6,12 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    # This workflow always deploys to the one production server. Since it's
+    # triggered manually, GitHub lets you pick ANY branch to run it on — this
+    # guard makes sure that, even if someone runs it on "development" (or any
+    # other branch) by mistake, it does nothing instead of shipping unreviewed
+    # code straight to production. Only a merge into main is deployable.
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code
