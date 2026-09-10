@@ -50,6 +50,10 @@ jobs:
         run: |
           scp -i ~/.ssh/deploy_key -r frontend/dist/* ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/veersetu-khandesh-incoming-dist/
 
+      - name: Copy nginx site config to server
+        run: |
+          scp -i ~/.ssh/deploy_key deploy/nginx.conf ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/veersetu-khandesh-nginx.conf
+
       - name: Restart backend and republish frontend
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
@@ -57,6 +61,10 @@ jobs:
             sudo rm -rf /var/www/veersetu-khandesh/* &&
             sudo cp -r /home/${{ secrets.EC2_USERNAME }}/veersetu-khandesh-incoming-dist/* /var/www/veersetu-khandesh/ &&
             sudo chown -R www-data:www-data /var/www/veersetu-khandesh &&
+            sudo cp /home/${{ secrets.EC2_USERNAME }}/veersetu-khandesh-nginx.conf /etc/nginx/sites-available/veersetu-khandesh &&
+            sudo ln -sf /etc/nginx/sites-available/veersetu-khandesh /etc/nginx/sites-enabled/veersetu-khandesh &&
+            sudo rm -f /etc/nginx/sites-enabled/default &&
+            sudo nginx -t &&
             sudo systemctl reload nginx &&
             echo "Deploy complete"
           '
