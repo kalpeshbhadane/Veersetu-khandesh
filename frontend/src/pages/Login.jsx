@@ -12,6 +12,7 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
 
   const justRegistered = location.state?.registered;
+  const justReset = location.state?.passwordReset;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,6 +42,11 @@ export default function Login() {
               Your account has been created. Log in below to register your soldier's details.
             </div>
           )}
+          {justReset && (
+            <div className="alert alert-success">
+              Your password has been reset. Log in with your new password below.
+            </div>
+          )}
           {error && <div className="alert alert-error">{error}</div>}
 
           <form onSubmit={handleSubmit}>
@@ -53,6 +59,9 @@ export default function Login() {
               <label htmlFor="password">Password</label>
               <input type="password" id="password" required autoComplete="current-password"
                 value={password} onChange={(e) => setPassword(e.target.value)} />
+              <p className="field-hint" style={{ textAlign: "right", marginTop: 6 }}>
+                <Link to="/forgot-password">Forgot your password?</Link>
+              </p>
             </div>
             <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
               {submitting ? "Logging in…" : "Log in"}

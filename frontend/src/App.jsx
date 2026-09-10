@@ -6,6 +6,8 @@ import About from "./pages/About.jsx";
 import MapExplore from "./pages/MapExplore.jsx";
 import SoldierDetail from "./pages/SoldierDetail.jsx";
 import Login from "./pages/Login.jsx";
+import ForgotPassword from "./pages/ForgotPassword.jsx";
+import ResetPassword from "./pages/ResetPassword.jsx";
 import RegisterFamily from "./pages/RegisterFamily.jsx";
 import RegisterSoldierForm from "./pages/RegisterSoldierForm.jsx";
 import FamilyDashboard from "./pages/FamilyDashboard.jsx";
@@ -34,6 +36,8 @@ export default function App() {
         <Route path="/map" element={<MapExplore />} />
         <Route path="/soldiers/:id" element={<SoldierDetail />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/register" element={<RegisterFamily />} />
  
         <Route

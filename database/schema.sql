@@ -62,3 +62,13 @@ CREATE TABLE IF NOT EXISTS soldiers (
 CREATE INDEX idx_soldier_district ON soldiers(district);
 CREATE INDEX idx_soldier_status ON soldiers(approval_status);
 CREATE INDEX idx_soldier_village ON soldiers(village);
+
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    token        VARCHAR(255) NOT NULL UNIQUE,
+    user_id      BIGINT NOT NULL,
+    expires_at   DATETIME NOT NULL,
+    used         BOOLEAN DEFAULT FALSE,
+    created_at   DATETIME,
+    CONSTRAINT fk_reset_token_user FOREIGN KEY (user_id) REFERENCES users(id)
+);
