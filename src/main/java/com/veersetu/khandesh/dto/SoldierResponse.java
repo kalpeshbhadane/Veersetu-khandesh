@@ -31,6 +31,7 @@ public record SoldierResponse(
         String familyContactName,
         String familyContactPhone,
         String familyContactEmail,
+        String familyUpiId,
         String qrCodePath,
         String approvalStatus,
         String rejectionReason,
@@ -47,7 +48,7 @@ public record SoldierResponse(
                 s.getOperationName(), s.getStory(),
                 s.getDistrict().name(), s.getDistrict().getDisplayName(), s.getTaluka(), s.getVillage(),
                 s.getAddress(), lat, lng,
-                s.getFamilyContactName(), s.getFamilyContactPhone(), s.getFamilyContactEmail(),
+                s.getFamilyContactName(), s.getFamilyContactPhone(), s.getFamilyContactEmail(), s.getFamilyUpiId(),
                 s.getQrCodePath(), s.getApprovalStatus().name(), s.getRejectionReason(),
                 s.getSubmittedBy() != null ? s.getSubmittedBy().getFullName() : "Admin",
                 s.getSubmittedBy() != null ? s.getSubmittedBy().getEmail() : null

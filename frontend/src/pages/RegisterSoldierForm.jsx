@@ -13,7 +13,7 @@ const emptyForm = {
   force: "", rank: "", battalion: "", unit: "", designation: "", serviceNumber: "", postingPlace: "",
   martyrdomDate: "", martyrdomPlace: "", operationName: "", story: "",
   district: "", taluka: "", village: "", address: "", latitude: "", longitude: "",
-  familyContactName: "", familyContactPhone: "", familyContactEmail: "",
+  familyContactName: "", familyContactPhone: "", familyContactEmail: "", familyUpiId: "",
 };
 
 // Turns a SoldierResponse from the API into the flat string-keyed shape the
@@ -260,7 +260,16 @@ export default function RegisterSoldierForm({ audience }) {
               <input type="email" id="familyContactEmail" value={form.familyContactEmail} onChange={update("familyContactEmail")} />
             </div>
             <div className="field">
-              <label htmlFor="qrCode">UPI QR code image (for direct donations){isEdit ? " — leave blank to keep the current one" : ""}</label>
+              <label htmlFor="familyUpiId">UPI ID (VPA)</label>
+              <input type="text" id="familyUpiId" placeholder="e.g. yourname@okhdfcbank"
+                value={form.familyUpiId} onChange={update("familyUpiId")} />
+              <p className="field-hint">
+                Shows a "Pay via UPI" button on the profile that opens the visitor's own payment app directly —
+                no screenshot or scanning needed. Leave the QR image below blank and we'll generate one from this automatically.
+              </p>
+            </div>
+            <div className="field">
+              <label htmlFor="qrCode">UPI QR code image (optional if you gave a UPI ID above){isEdit ? " — leave blank to keep the current one" : ""}</label>
               {isEdit && currentQrPath && (
                 <div className="current-file-preview">
                   <img src={buildFileUrl(currentQrPath)} alt="Current QR code" />
@@ -268,7 +277,7 @@ export default function RegisterSoldierForm({ audience }) {
                 </div>
               )}
               <input type="file" id="qrCode" accept="image/*" onChange={(e) => setQrCode(e.target.files[0])} />
-              <p className="field-hint">Upload a screenshot of your UPI QR code from Google Pay, PhonePe, Paytm etc.</p>
+              <p className="field-hint">Only needed if you'd rather upload your own QR screenshot from Google Pay, PhonePe, Paytm etc. instead of the auto-generated one.</p>
             </div>
 
             <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: 10 }} disabled={submitting}>

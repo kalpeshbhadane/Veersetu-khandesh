@@ -64,7 +64,8 @@ private String force;        // Indian Army / Indian Navy / Indian Air Force / B
     private String familyContactName;
     private String familyContactPhone;
     private String familyContactEmail;
-    private String qrCodePath;   // uploaded UPI QR code image for direct donations
+    private String familyUpiId;  // UPI VPA, e.g. "name@okhdfcbank" — powers the "Pay via UPI" deep link
+    private String qrCodePath;   // UPI QR code image: family's own upload, or auto-generated from familyUpiId
 
     // ---- Workflow ----
     @Enumerated(EnumType.STRING)

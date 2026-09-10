@@ -35,12 +35,23 @@ export default function SoldierDetail() {
           <div>
             <div className="detail-photo" style={photo ? { backgroundImage: `url(${photo})` } : {}} />
 
-            {qr && (
+            {(qr || soldier.familyUpiId) && (
               <div className="donate-box">
                 <h4 style={{ fontFamily: "var(--font-head)", marginBottom: 10 }}>Support this family</h4>
-                <img src={qr} alt="UPI QR code for donations" />
+                {qr && <img src={qr} alt="UPI QR code for donations" />}
+                {soldier.familyUpiId && (
+                  <a
+                    href={`upi://pay?pa=${encodeURIComponent(soldier.familyUpiId)}&pn=${encodeURIComponent(soldier.name)}&cu=INR`}
+                    className="btn btn-brass btn-block"
+                    style={qr ? { marginTop: 14 } : undefined}
+                  >
+                    Pay via UPI
+                  </a>
+                )}
                 <p style={{ fontSize: "0.85rem", margin: "10px auto 0" }}>
-                  Scan to send support directly via UPI. VeerSetu Khandesh does not collect or hold any funds.
+                  {soldier.familyUpiId
+                    ? <>On your own phone, tap <strong>Pay via UPI</strong> to open your payment app directly — no screenshot or scanning needed. On another device, scan the QR code instead. VeerSetu Khandesh does not collect or hold any funds.</>
+                    : "Scan to send support directly via UPI. VeerSetu Khandesh does not collect or hold any funds."}
                 </p>
               </div>
             )}
