@@ -37,22 +37,24 @@ export default function AdminDashboard() {
         {loading && <div className="loading-strip">Loading…</div>}
 
         {!loading && pending.length > 0 && (
-          <table className="table">
-            <thead>
-              <tr><th>Name</th><th>Village</th><th>District</th><th>Submitted by</th><th></th></tr>
-            </thead>
-            <tbody>
-              {pending.map((s) => (
-                <tr key={s.id}>
-                  <td>{s.name}</td>
-                  <td>{s.village}</td>
-                  <td>{s.districtDisplayName}</td>
-                  <td>{s.submittedByName}</td>
-                  <td><Link to={`/admin/soldiers/${s.id}/review`} className="btn btn-secondary btn-sm">Review</Link></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="table-scroll">
+            <table className="table">
+              <thead>
+                <tr><th>Name</th><th>Village</th><th>District</th><th>Submitted by</th><th></th></tr>
+              </thead>
+              <tbody>
+                {pending.map((s) => (
+                  <tr key={s.id}>
+                    <td>{s.name}</td>
+                    <td>{s.village}</td>
+                    <td>{s.districtDisplayName}</td>
+                    <td>{s.submittedByName}</td>
+                    <td><Link to={`/admin/soldiers/${s.id}/review`} className="btn btn-secondary btn-sm">Review</Link></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
 
         {!loading && pending.length === 0 && (
