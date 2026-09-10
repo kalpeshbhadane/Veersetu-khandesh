@@ -24,8 +24,10 @@ cards**.
   - **No submission goes public until an admin approves it.**
 - **Public, no-login browsing**: an interactive Leaflet map of the four Khandesh
   districts — click a district, then a village, to see soldiers recorded there.
-- Every published profile shows the family's **UPI QR code** for direct financial
-  support, plus a phone number and email for any other kind of help (jobs,
+- Every published profile shows a **"Pay via UPI" button** (opens the visitor's
+  own payment app directly, from a UPI ID the family provides — no screenshot
+  or scanning needed) and/or a **UPI QR code** for support from another
+  device, plus a phone number and email for any other kind of help (jobs,
   education sponsorship, legal aid, etc.). The platform is a **directory, not a
   payment processor** — it never touches the money.
 - Home and About pages explain the motive and the services on offer.

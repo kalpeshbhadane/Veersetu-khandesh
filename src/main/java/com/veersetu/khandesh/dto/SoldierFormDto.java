@@ -52,6 +52,10 @@ public class SoldierFormDto {
     private String familyContactPhone;
     private String familyContactEmail;
 
+    // UPI VPA, e.g. "name@okhdfcbank". Optional, and independent of qrCode below —
+    // provide either, or both. See SoldierService for how they interact.
+    private String familyUpiId;
+
     private MultipartFile photo;
     private MultipartFile qrCode;
 }

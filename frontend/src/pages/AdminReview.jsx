@@ -58,6 +58,7 @@ export default function AdminReview() {
                 <tr><td>Martyrdom date &amp; place</td><td>{soldier.martyrdomDate || ""} — {soldier.martyrdomPlace || ""}</td></tr>
                 <tr><td>Village / Taluka / District</td><td>{soldier.village} / {soldier.taluka || "-"} / {soldier.districtDisplayName}</td></tr>
                 <tr><td>Contact</td><td>{soldier.familyContactPhone || "-"} &middot; {soldier.familyContactEmail || "-"}</td></tr>
+                <tr><td>UPI ID</td><td>{soldier.familyUpiId || "-"}</td></tr>
                 <tr><td>Submitted by</td><td>{soldier.submittedByName} {soldier.submittedByEmail ? `(${soldier.submittedByEmail})` : ""}</td></tr>
               </tbody>
             </table>

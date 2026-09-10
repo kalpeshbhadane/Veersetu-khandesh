@@ -48,7 +48,8 @@ CREATE TABLE IF NOT EXISTS soldiers (
     family_contact_name   VARCHAR(150),
     family_contact_phone  VARCHAR(20),
     family_contact_email  VARCHAR(150),
-    qr_code_path          VARCHAR(255),
+    family_upi_id         VARCHAR(150),                -- UPI VPA, powers the "Pay via UPI" deep link
+    qr_code_path          VARCHAR(255),                -- family's own upload, or auto-generated from family_upi_id
 
     approval_status       VARCHAR(20) DEFAULT 'PENDING', -- PENDING / APPROVED / REJECTED
     rejection_reason      VARCHAR(500),
