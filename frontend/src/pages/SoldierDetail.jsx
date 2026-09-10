@@ -7,6 +7,17 @@ function formatDate(iso) {
   return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
 }
 
+// upi:// links only go anywhere on a device that has a UPI app to hand them
+// to — tapping one on a desktop browser just fails silently (no app is
+// registered for the scheme). Only offer the button where it can plausibly
+// work, and explain the alternative everywhere else instead of a dead click.
+function isLikelyMobileDevice() {
+  if (/Android|iPhone|iPod/i.test(navigator.userAgent)) return true;
+  // iPadOS 13+ Safari reports itself as a Mac by default; a touch-capable
+  // "MacIntel" is actually an iPad.
+  return navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+}
+
 export default function SoldierDetail() {
   const { id } = useParams();
   const [soldier, setSoldier] = useState(null);
@@ -21,6 +32,7 @@ export default function SoldierDetail() {
 
   const photo = buildFileUrl(soldier.photoPath);
   const qr = buildFileUrl(soldier.qrCodePath);
+  const canOpenUpiApp = isLikelyMobileDevice();
 
   return (
     <section className="section" style={{ paddingTop: 40 }}>
@@ -39,7 +51,7 @@ export default function SoldierDetail() {
               <div className="donate-box">
                 <h4 style={{ fontFamily: "var(--font-head)", marginBottom: 10 }}>Support this family</h4>
                 {qr && <img src={qr} alt="UPI QR code for donations" />}
-                {soldier.familyUpiId && (
+                {soldier.familyUpiId && canOpenUpiApp && (
                   <a
                     href={`upi://pay?pa=${encodeURIComponent(soldier.familyUpiId)}&pn=${encodeURIComponent(soldier.name)}&cu=INR`}
                     className="btn btn-brass btn-block"
@@ -49,9 +61,12 @@ export default function SoldierDetail() {
                   </a>
                 )}
                 <p style={{ fontSize: "0.85rem", margin: "10px auto 0" }}>
-                  {soldier.familyUpiId
-                    ? <>On your own phone, tap <strong>Pay via UPI</strong> to open your payment app directly — no screenshot or scanning needed. On another device, scan the QR code instead. VeerSetu Khandesh does not collect or hold any funds.</>
-                    : "Scan to send support directly via UPI. VeerSetu Khandesh does not collect or hold any funds."}
+                  {!soldier.familyUpiId
+                    ? "Scan to send support directly via UPI."
+                    : canOpenUpiApp
+                      ? <>Tap <strong>Pay via UPI</strong> above to open your payment app directly — no screenshot or scanning needed. On another device, scan the QR code instead.</>
+                      : <>Open this page on your phone to pay with one tap{qr ? ", or scan the QR code above from your phone's camera" : ""}. The button only works on a phone with a UPI app installed.</>}
+                  {" "}VeerSetu Khandesh does not collect or hold any funds.
                 </p>
               </div>
             )}
