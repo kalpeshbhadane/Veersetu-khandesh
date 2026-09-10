@@ -1,7 +1,10 @@
 package com.veersetu.khandesh.controller;
 
+import com.veersetu.khandesh.dto.ForgotPasswordDto;
 import com.veersetu.khandesh.dto.RegisterDto;
+import com.veersetu.khandesh.dto.ResetPasswordDto;
 import com.veersetu.khandesh.dto.UserResponse;
+import com.veersetu.khandesh.service.PasswordResetService;
 import com.veersetu.khandesh.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,7 @@ import java.util.Map;
 public class AuthApiController {
 
     private final UserService userService;
+    private final PasswordResetService passwordResetService;
 
     // Login itself is handled by Spring Security's formLogin at POST /api/auth/login (see SecurityConfig).
 
@@ -49,6 +53,25 @@ public class AuthApiController {
         try {
             var user = userService.updateProfile(authentication.getName(), dto);
             return ResponseEntity.ok(UserResponse.from(user));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    // Always returns the same generic message, whether or not the email is registered,
+    // so this can't be used to check who has an account.
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordDto dto) {
+        passwordResetService.requestReset(dto.getEmail());
+        return ResponseEntity.ok(Map.of("message",
+                "If an account exists for that email address, a password reset link has been sent."));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordDto dto) {
+        try {
+            passwordResetService.resetPassword(dto.getToken(), dto.getNewPassword());
+            return ResponseEntity.ok(Map.of("message", "Your password has been reset. You can now log in."));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }

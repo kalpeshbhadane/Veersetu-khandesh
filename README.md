@@ -76,8 +76,13 @@ veersetu-khandesh/
 | POST | `/api/auth/login` | Public | Log in (form-urlencoded `email`/`password`) |
 | POST | `/api/auth/logout` | Authenticated | Log out |
 | GET | `/api/auth/me` | Authenticated | Current session user |
+| PUT | `/api/auth/me` | Authenticated | Update your account (name, phone, relation, password) |
+| POST | `/api/auth/forgot-password` | Public | Email a password reset link for an account (JSON `{email}`) |
+| POST | `/api/auth/reset-password` | Public | Set a new password using a reset token (JSON `{token, newPassword}`) |
 | GET | `/api/family/soldiers` | FAMILY | Your own submissions |
+| GET | `/api/family/soldiers/{id}` | FAMILY | One of your own submissions, in full (for editing) |
 | POST | `/api/family/soldiers` | FAMILY | Submit a soldier (multipart, goes to PENDING) |
+| PUT | `/api/family/soldiers/{id}` | FAMILY | Edit your own submission (multipart, goes back to PENDING) |
 | GET | `/api/admin/soldiers/pending` | ADMIN | Review queue |
 | GET | `/api/admin/soldiers/{id}` | ADMIN | Any record, any status |
 | POST | `/api/admin/soldiers/{id}/approve` | ADMIN | Publish a record |
@@ -105,6 +110,14 @@ console log for the generated credentials (or set `veersetu.admin.email` /
 `veersetu.admin.password` in `application.properties` beforehand). **Log in and
 change this password before deploying publicly.**
 
+**Forgot password:** no SMTP server is configured by default, so a "forgot
+password" request just prints the reset link to the backend console instead
+of emailing it — fine for local development. To send real email, set the
+`SPRING_MAIL_HOST` / `SPRING_MAIL_PORT` / `SPRING_MAIL_USERNAME` /
+`SPRING_MAIL_PASSWORD` environment variables (Spring Boot picks these up
+automatically) and set `veersetu.frontend-url` (or the `FRONTEND_URL` env
+var) to your deployed frontend's URL, so reset links point at the right place.
+
 ### 2. Frontend
 
 ```bash
@@ -118,6 +131,18 @@ and the session cookie just works. For production, build with `npm run build`
 and serve the `dist/` folder from any static host (or copy it into the Spring
 Boot app's `src/main/resources/static` and drop the CORS config), pointing it
 at your deployed API's URL.
+
+### Production nginx config (SPA routing)
+
+`deploy/nginx.conf` is the site config used on the deployed server — it
+serves the built `frontend/dist` and proxies `/api` and `/uploads` to the
+backend on `127.0.0.1:8080`. Its `location /` block uses
+`try_files $uri $uri/ /index.html;` so that a hard refresh or a direct link
+to a client-side route (e.g. `/map`, `/soldiers/12`) still loads the React
+app instead of a raw 404 — without it, only the root URL works and every
+other page breaks on refresh. `.github/workflows/deploy.yml` copies this
+file to `/etc/nginx/sites-available/veersetu-khandesh` and reloads nginx on
+every deploy, so edit it here, not on the server.
 
 ## Design system
 

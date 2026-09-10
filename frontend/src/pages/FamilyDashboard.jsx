@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext.jsx";
 
@@ -8,6 +8,7 @@ const badgeLabel = { PENDING: "Pending review", APPROVED: "Approved & live", REJ
 
 export default function FamilyDashboard() {
   const { user } = useAuth();
+  const location = useLocation();
   const [soldiers, setSoldiers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,6 +30,17 @@ export default function FamilyDashboard() {
           <Link to="/family/soldiers/new" className="btn btn-primary">+ Register a soldier</Link>
         </div>
 
+        {location.state?.updated && (
+          <div className="alert alert-success">
+            Your changes have been saved and sent back for admin review.
+          </div>
+        )}
+        {location.state?.submitted && (
+          <div className="alert alert-success">
+            Your submission has been received and is awaiting admin review.
+          </div>
+        )}
+
         {loading && <div className="loading-strip">Loading…</div>}
 
         {!loading && soldiers.length > 0 && (
@@ -43,7 +55,10 @@ export default function FamilyDashboard() {
                   <td>{s.village}</td>
                   <td>{s.districtDisplayName}</td>
                   <td><span className={`badge ${badgeClass[s.approvalStatus]}`}>{badgeLabel[s.approvalStatus]}</span></td>
-                  <td><Link to={`/soldiers/${s.id}`}>View</Link></td>
+                  <td style={{ display: "flex", gap: 14 }}>
+                    <Link to={`/soldiers/${s.id}`}>View</Link>
+                    <Link to={`/family/soldiers/${s.id}/edit`}>Edit</Link>
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -25,6 +25,7 @@ export const api = {
     }),
   put: (path, body) => request(path, { method: "PUT", body: JSON.stringify(body) }),
   postForm: (path, formData) => request(path, { method: "POST", body: formData }),
+  putForm: (path, formData) => request(path, { method: "PUT", body: formData }),
 };
 
 // Spring Security's default formLogin endpoint expects

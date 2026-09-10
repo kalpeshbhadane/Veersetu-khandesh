@@ -23,6 +23,45 @@ public class SoldierService {
     @Transactional
     public Soldier submit(SoldierFormDto form, User submittedBy) {
         Soldier soldier = new Soldier();
+        applyForm(soldier, form);
+        soldier.setSubmittedBy(submittedBy);
+        soldier.setApprovalStatus(ApprovalStatus.PENDING);
+        soldier.setSubmittedAt(LocalDateTime.now());
+
+        soldier.setPhotoPath(fileStorageService.store(form.getPhoto(), "photos"));
+        soldier.setQrCodePath(fileStorageService.store(form.getQrCode(), "qrcodes"));
+
+        return soldierRepository.save(soldier);
+    }
+
+    /**
+     * A family member editing a record they already submitted (used by the
+     * family dashboard's "Edit" flow). Every field can change, including a
+     * replacement photo/QR code. Whatever the record's previous status, the
+     * edit is treated as a fresh submission that needs an admin's eyes again
+     * — it goes back to PENDING and drops off the public map until
+     * re-approved, matching the "nothing goes public without review" rule.
+     */
+    @Transactional
+    public Soldier update(Long id, SoldierFormDto form, User requester) {
+        Soldier soldier = findOwnedById(id, requester);
+        applyForm(soldier, form);
+
+        if (form.getPhoto() != null && !form.getPhoto().isEmpty()) {
+            soldier.setPhotoPath(fileStorageService.store(form.getPhoto(), "photos"));
+        }
+        if (form.getQrCode() != null && !form.getQrCode().isEmpty()) {
+            soldier.setQrCodePath(fileStorageService.store(form.getQrCode(), "qrcodes"));
+        }
+
+        soldier.setApprovalStatus(ApprovalStatus.PENDING);
+        soldier.setRejectionReason(null);
+        soldier.setReviewedAt(null);
+
+        return soldierRepository.save(soldier);
+    }
+
+    private void applyForm(Soldier soldier, SoldierFormDto form) {
         soldier.setName(form.getName());
         soldier.setAge(form.getAge());
         soldier.setDateOfBirth(form.getDateOfBirth());
@@ -46,14 +85,15 @@ public class SoldierService {
         soldier.setFamilyContactName(form.getFamilyContactName());
         soldier.setFamilyContactPhone(form.getFamilyContactPhone());
         soldier.setFamilyContactEmail(form.getFamilyContactEmail());
-        soldier.setSubmittedBy(submittedBy);
-        soldier.setApprovalStatus(ApprovalStatus.PENDING);
-        soldier.setSubmittedAt(LocalDateTime.now());
+    }
 
-        soldier.setPhotoPath(fileStorageService.store(form.getPhoto(), "photos"));
-        soldier.setQrCodePath(fileStorageService.store(form.getQrCode(), "qrcodes"));
-
-        return soldierRepository.save(soldier);
+    /** A soldier record, but only if it was submitted by the given user — otherwise "not found". */
+    public Soldier findOwnedById(Long id, User user) {
+        Soldier soldier = findById(id);
+        if (soldier.getSubmittedBy() == null || !soldier.getSubmittedBy().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("Soldier record not found");
+        }
+        return soldier;
     }
 
     public List<Soldier> findPending() {
