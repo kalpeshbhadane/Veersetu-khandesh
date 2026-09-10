@@ -60,6 +60,14 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/family/soldiers/:id/edit"
+          element={
+            <ProtectedRoute role="FAMILY">
+              <RegisterSoldierForm audience="family" />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/admin/dashboard"

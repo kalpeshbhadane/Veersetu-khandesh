@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { api } from "../api/client";
+import { useNavigate, useParams } from "react-router-dom";
+import { api, buildFileUrl } from "../api/client";
 
 const FORCES = [
   "Indian Army", "Indian Navy", "Indian Air Force",
@@ -16,18 +16,49 @@ const emptyForm = {
   familyContactName: "", familyContactPhone: "", familyContactEmail: "",
 };
 
+// Turns a SoldierResponse from the API into the flat string-keyed shape the
+// form's controlled inputs expect (numbers/nulls -> "" so inputs stay controlled).
+function toFormState(s) {
+  const next = { ...emptyForm };
+  Object.keys(next).forEach((key) => {
+    const value = s[key];
+    next[key] = value === null || value === undefined ? "" : value;
+  });
+  return next;
+}
+
 export default function RegisterSoldierForm({ audience }) {
   const navigate = useNavigate();
+  const { id: editId } = useParams(); // only present on the /edit route
+  const isEdit = Boolean(editId);
+
   const [districts, setDistricts] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [photo, setPhoto] = useState(null);
   const [qrCode, setQrCode] = useState(null);
+  const [currentPhotoPath, setCurrentPhotoPath] = useState(null);
+  const [currentQrPath, setCurrentQrPath] = useState(null);
+  const [recordStatus, setRecordStatus] = useState(null);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [loadingRecord, setLoadingRecord] = useState(isEdit);
 
   useEffect(() => {
     api.get("/api/public/districts").then(setDistricts);
   }, []);
+
+  useEffect(() => {
+    if (!isEdit) return;
+    api.get(`/api/family/soldiers/${editId}`)
+      .then((s) => {
+        setForm(toFormState(s));
+        setCurrentPhotoPath(s.photoPath);
+        setCurrentQrPath(s.qrCodePath);
+        setRecordStatus(s.approvalStatus);
+      })
+      .catch((e) => setError(e.message))
+      .finally(() => setLoadingRecord(false));
+  }, [isEdit, editId]);
 
   const update = (field) => (e) => setForm({ ...form, [field]: e.target.value });
 
@@ -43,11 +74,15 @@ export default function RegisterSoldierForm({ audience }) {
       if (photo) data.append("photo", photo);
       if (qrCode) data.append("qrCode", qrCode);
 
-      const endpoint = audience === "admin" ? "/api/admin/soldiers" : "/api/family/soldiers";
-      await api.postForm(endpoint, data);
+      if (isEdit) {
+        await api.putForm(`/api/family/soldiers/${editId}`, data);
+      } else {
+        const endpoint = audience === "admin" ? "/api/admin/soldiers" : "/api/family/soldiers";
+        await api.postForm(endpoint, data);
+      }
 
       navigate(audience === "admin" ? "/admin/dashboard" : "/family/dashboard", {
-        state: { submitted: true },
+        state: isEdit ? { updated: true } : { submitted: true },
       });
     } catch (err) {
       setError(err.message);
@@ -56,17 +91,35 @@ export default function RegisterSoldierForm({ audience }) {
     }
   };
 
+  if (loadingRecord) return <div className="loading-strip">Loading record…</div>;
+
   return (
     <section className="section" style={{ paddingTop: 44 }}>
       <div className="container">
         <div className="form-card wide">
           <span className="hero-eyebrow" style={{ display: "block", textAlign: "center" }}>Soldier record</span>
-          <h2 style={{ textAlign: "center", marginBottom: 6 }}>Register a soldier's details</h2>
+          <h2 style={{ textAlign: "center", marginBottom: 6 }}>
+            {isEdit ? "Update soldier record" : "Register a soldier's details"}
+          </h2>
           <p style={{ textAlign: "center", margin: "0 auto 8px" }}>
-            {audience === "admin"
-              ? "As an admin, records you submit are published immediately."
-              : "Your submission will be reviewed by an administrator before it appears publicly."}
+            {isEdit
+              ? "Change any field, and replace the photo or QR code only if you need to — anything you leave blank keeps its current file."
+              : audience === "admin"
+                ? "As an admin, records you submit are published immediately."
+                : "Your submission will be reviewed by an administrator before it appears publicly."}
           </p>
+
+          {isEdit && recordStatus === "APPROVED" && (
+            <div className="alert alert-info">
+              This record is currently <strong>live and public</strong>. Saving changes will send it back for
+              admin review, and it will be temporarily removed from the public map until re-approved.
+            </div>
+          )}
+          {isEdit && recordStatus === "REJECTED" && (
+            <div className="alert alert-info">
+              This record was previously rejected. Update it below and resubmit for review.
+            </div>
+          )}
 
           {error && <div className="alert alert-error">{error}</div>}
 
@@ -87,7 +140,13 @@ export default function RegisterSoldierForm({ audience }) {
               </div>
             </div>
             <div className="field">
-              <label htmlFor="photo">Soldier's photo</label>
+              <label htmlFor="photo">Soldier's photo{isEdit ? " (leave blank to keep the current one)" : ""}</label>
+              {isEdit && currentPhotoPath && (
+                <div className="current-file-preview">
+                  <img src={buildFileUrl(currentPhotoPath)} alt="Current photo" />
+                  <span>Current photo</span>
+                </div>
+              )}
               <input type="file" id="photo" accept="image/*" onChange={(e) => setPhoto(e.target.files[0])} />
             </div>
 
@@ -201,13 +260,19 @@ export default function RegisterSoldierForm({ audience }) {
               <input type="email" id="familyContactEmail" value={form.familyContactEmail} onChange={update("familyContactEmail")} />
             </div>
             <div className="field">
-              <label htmlFor="qrCode">UPI QR code image (for direct donations)</label>
+              <label htmlFor="qrCode">UPI QR code image (for direct donations){isEdit ? " — leave blank to keep the current one" : ""}</label>
+              {isEdit && currentQrPath && (
+                <div className="current-file-preview">
+                  <img src={buildFileUrl(currentQrPath)} alt="Current QR code" />
+                  <span>Current QR code</span>
+                </div>
+              )}
               <input type="file" id="qrCode" accept="image/*" onChange={(e) => setQrCode(e.target.files[0])} />
               <p className="field-hint">Upload a screenshot of your UPI QR code from Google Pay, PhonePe, Paytm etc.</p>
             </div>
 
             <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: 10 }} disabled={submitting}>
-              {submitting ? "Submitting…" : "Submit for review"}
+              {submitting ? (isEdit ? "Saving…" : "Submitting…") : (isEdit ? "Save changes" : "Submit for review")}
             </button>
           </form>
         </div>

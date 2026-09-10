@@ -195,6 +195,12 @@ a:hover { text-decoration: underline; }
 .alert { padding: 13px 16px; border-radius: var(--radius); font-size: 0.9rem; margin-bottom: 18px; }
 .alert-error { background: #FBEAE9; color: var(--oxblood); border: 1px solid #E5B9BC; }
 .alert-success { background: #EAF1EA; color: var(--field-green); border: 1px solid #BFD8C4; }
+.alert-info { background: #FBF3E3; color: var(--brass-dark); border: 1px solid #E9D7A8; }
+
+/* current-file preview shown next to a file input when editing an existing record */
+.current-file-preview { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.current-file-preview img { width: 56px; height: 56px; object-fit: cover; border: 1px solid var(--rule); border-radius: 4px; background: var(--white); }
+.current-file-preview span { font-size: 0.78rem; color: var(--charcoal-soft); text-transform: uppercase; letter-spacing: 0.04em; }
 
 /* ---------- Tables (dashboards) ---------- */
 .table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--rule); }
