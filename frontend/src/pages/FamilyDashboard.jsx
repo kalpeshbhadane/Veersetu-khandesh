@@ -44,25 +44,27 @@ export default function FamilyDashboard() {
         {loading && <div className="loading-strip">Loading…</div>}
 
         {!loading && soldiers.length > 0 && (
-          <table className="table">
-            <thead>
-              <tr><th>Name</th><th>Village</th><th>District</th><th>Status</th><th></th></tr>
-            </thead>
-            <tbody>
-              {soldiers.map((s) => (
-                <tr key={s.id}>
-                  <td>{s.name}</td>
-                  <td>{s.village}</td>
-                  <td>{s.districtDisplayName}</td>
-                  <td><span className={`badge ${badgeClass[s.approvalStatus]}`}>{badgeLabel[s.approvalStatus]}</span></td>
-                  <td style={{ display: "flex", gap: 14 }}>
-                    <Link to={`/soldiers/${s.id}`}>View</Link>
-                    <Link to={`/family/soldiers/${s.id}/edit`}>Edit</Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="table-scroll">
+            <table className="table">
+              <thead>
+                <tr><th>Name</th><th>Village</th><th>District</th><th>Status</th><th></th></tr>
+              </thead>
+              <tbody>
+                {soldiers.map((s) => (
+                  <tr key={s.id}>
+                    <td>{s.name}</td>
+                    <td>{s.village}</td>
+                    <td>{s.districtDisplayName}</td>
+                    <td><span className={`badge ${badgeClass[s.approvalStatus]}`}>{badgeLabel[s.approvalStatus]}</span></td>
+                    <td style={{ display: "flex", gap: 14 }}>
+                      <Link to={`/soldiers/${s.id}`}>View</Link>
+                      <Link to={`/family/soldiers/${s.id}/edit`}>Edit</Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
 
         {!loading && soldiers.length === 0 && (

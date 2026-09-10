@@ -74,7 +74,8 @@ a:hover { text-decoration: underline; }
    scrolls past it. See the `isolation: isolate` on the map wrappers too —
    that scopes Leaflet's internal stacking so it can never escape its box. */
 .site-header { background: var(--olive-dark); border-bottom: 3px solid var(--brass); position: sticky; top: 0; z-index: 1200; }
-.nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; }
+.nav { position: relative; display: flex; align-items: center; justify-content: space-between; padding: 14px 0; }
+.nav-toggle { display: none; background: none; border: none; color: var(--panel); font-size: 1.5rem; line-height: 1; padding: 4px 6px; cursor: pointer; }
 .brand { display: flex; align-items: center; gap: 12px; font-family: var(--font-head); font-size: 1.35rem; font-weight: 700; color: var(--panel); }
 .brand .mark {
   width: 38px; height: 38px;
@@ -228,10 +229,44 @@ a:hover { text-decoration: underline; }
 
 .loading-strip { padding: 60px 0; text-align: center; color: var(--charcoal-soft); font-family: var(--font-head); text-transform: uppercase; letter-spacing: 0.08em; }
 
+/* horizontal-scroll safety net for the dashboard tables — narrower than
+   this, the columns would otherwise force the whole page to scroll sideways */
+.table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table-scroll .table { min-width: 540px; }
+
 @media (max-width: 860px) {
-  .hero-grid, .detail-grid, .grid-3, .grid-2, .grid-4, .footer-grid, .map-shell { grid-template-columns: 1fr; }
+  .hero-grid, .detail-grid, .grid-3, .grid-2, .footer-grid, .map-shell { grid-template-columns: 1fr; }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .map-sidebar { border-right: none; border-bottom: 1px solid var(--rule); max-height: none; }
   h1 { font-size: 2rem; }
   .field-row { grid-template-columns: 1fr; }
   .form-card { padding: 26px 22px; }
+
+  /* collapse the nav into a toggled dropdown panel below the header */
+  .nav-toggle { display: block; }
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%; left: 0; right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    background: var(--olive-dark);
+    border-top: 1px solid var(--brass);
+    box-shadow: 0 12px 20px rgba(35,38,30,0.25);
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a, .nav-links .nav-logout { width: 100%; padding: 14px 24px; text-align: left; }
+  .nav-links .nav-cta { margin: 6px 24px; width: calc(100% - 48px); text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .brand { font-size: 1.12rem; }
+  .brand small { font-size: 0.56rem; }
+  h1 { font-size: 1.7rem; }
+  .grid-4 { grid-template-columns: 1fr; }
+  .hero-stats { flex-wrap: wrap; row-gap: 16px; }
+  .hero-map-frame .leaflet-container { height: 260px; }
+  .map-shell .leaflet-container { height: 380px; }
+  .detail-photo { aspect-ratio: 4/3; }
 }
