@@ -91,6 +91,11 @@ veersetu-khandesh/
 | POST | `/api/admin/soldiers/{id}/reject` | ADMIN | Reject with a reason (JSON `{reason}`) |
 | POST | `/api/admin/soldiers` | ADMIN | Add a record directly (multipart, auto-approved) |
 
+## Contributing
+
+Branching model, PR flow, and how deploys to production actually happen:
+see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Running it locally
 
 ### 1. Backend
