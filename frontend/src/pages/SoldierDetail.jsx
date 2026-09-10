@@ -73,12 +73,22 @@ export default function SoldierDetail() {
 
             <div className="contact-row">
               {soldier.familyContactPhone && (
-                <a href={`tel:${soldier.familyContactPhone}`} className="btn btn-secondary btn-sm">Call family</a>
+                <a href={`tel:${soldier.familyContactPhone}`} className="btn btn-secondary btn-sm">
+                  Call: {soldier.familyContactPhone}
+                </a>
               )}
               {soldier.familyContactEmail && (
-                <a href={`mailto:${soldier.familyContactEmail}`} className="btn btn-secondary btn-sm">Email family</a>
+                <a href={`mailto:${soldier.familyContactEmail}`} className="btn btn-secondary btn-sm">
+                  Email: {soldier.familyContactEmail}
+                </a>
               )}
             </div>
+            {(soldier.familyContactPhone || soldier.familyContactEmail) && (
+              <p className="field-hint" style={{ textAlign: "center", marginTop: 8 }}>
+                Tapping these dials or composes an email directly on a phone. On a computer without
+                calling software, the number/address above is still shown so you can copy it.
+              </p>
+            )}
           </div>
 
           <div>
